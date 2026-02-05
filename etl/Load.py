@@ -10,16 +10,22 @@ from config.logger import setup_logger
 logger = setup_logger()
 
 # =========================
-# 1️⃣ Connexion MySQL
+# 1️⃣ Connexion MySQL (création d'engine à l'exécution)
+#    -> évite la création d'un engine au chargement du module
+#       (problème si les variables d'environnement ne sont pas encore définies)
 # =========================
-DB_USER = os.getenv("DB_USER", "root")
-DB_PASSWORD = os.getenv("DB_PASSWORD")
-DB_NAME = os.getenv("DB_NAME")
-DB_HOST = os.getenv("DB_HOST", "mysql")
-engine = create_engine(
-    f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}/{DB_NAME}",
-    echo=True  # affiche les requêtes SQL (debug)
-)
+def get_engine():
+    """Crée et retourne un SQLAlchemy engine en lisant les variables d'env au runtime."""
+    DB_USER = os.getenv("DB_USER", "root")
+    DB_PASSWORD = os.getenv("DB_PASSWORD")
+    DB_NAME = os.getenv("DB_NAME")
+    DB_HOST = os.getenv("DB_HOST", "mysql")
+
+    if not DB_PASSWORD:
+        raise RuntimeError("DB_PASSWORD is not set in environment")
+
+    url = f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}/{DB_NAME}"
+    return create_engine(url, echo=True, pool_pre_ping=True)
 
 metadata = MetaData()
 
@@ -49,6 +55,7 @@ weather_table = Table(
 # =========================
 def create_table():
     logger.info("[LOAD] Creating table if not exists")
+    engine = get_engine()
     metadata.create_all(engine)
     logger.info("[LOAD] Table ready")
 
@@ -61,6 +68,7 @@ def load_to_db(df: pd.DataFrame):
 
         df["scrape_date"] = pd.to_datetime(df["scrape_date"])
 
+        engine = get_engine()
         df.to_sql(
             "weather_data",
             con=engine,

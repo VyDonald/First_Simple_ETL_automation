@@ -17,7 +17,7 @@ jobs:
         ports:
           - 3306:3306
         options: >-
-            --health-cmd="mysqladmin ping -h mysql -u root -p$MYSQL_ROOT_PASSWORD" --health-interval=10s --health-timeout=5s --health-retries=10
+          --health-cmd="mysqladmin ping -h localhost -u root -p$${MYSQL_ROOT_PASSWORD}" --health-interval=10s --health-timeout=5s --health-retries=10
 
     steps:
       - name: 📥 Checkout repository
@@ -56,6 +56,43 @@ jobs:
             sleep 2
           done
           echo "MySQL did not become ready" && exit 1
+
+      - name: ℹ️ Print DB env (non-secret)
+        env:
+          DB_USER: root
+          DB_HOST: mysql
+          DB_NAME: First_Data
+        run: |
+          echo "DB_USER=$DB_USER"
+          echo "DB_HOST=$DB_HOST"
+          echo "DB_NAME=$DB_NAME"
+
+      - name: 🔬 Test DB connection (SQLAlchemy)
+        env:
+          DB_USER: root
+          DB_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+          DB_HOST: mysql
+          DB_NAME: First_Data
+        run: |
+          python - <<'PY'
+          import os, traceback
+          from sqlalchemy import create_engine
+
+          user = os.environ.get('DB_USER')
+          pwd = os.environ.get('DB_PASSWORD')
+          host = os.environ.get('DB_HOST')
+          name = os.environ.get('DB_NAME')
+
+          print('Try connect to:', user, host, name)
+          try:
+              engine = create_engine(f"mysql+pymysql://{user}:{pwd}@{host}/{name}")
+              conn = engine.connect()
+              print('SQLAlchemy: connection OK')
+              conn.close()
+          except Exception:
+              traceback.print_exc()
+              raise
+          PY
 
       - name: 🚀 Run ETL pipeline
         env:
