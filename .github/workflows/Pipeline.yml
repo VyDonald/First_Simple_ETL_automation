@@ -17,7 +17,7 @@ jobs:
         ports:
           - 3306:3306
         options: >-
-          --health-cmd="mysqladmin ping -h localhost -u root -p$${MYSQL_ROOT_PASSWORD}" --health-interval=10s --health-timeout=5s --health-retries=5
+            --health-cmd="mysqladmin ping -h mysql -u root -p$MYSQL_ROOT_PASSWORD" --health-interval=10s --health-timeout=5s --health-retries=10
 
     steps:
       - name: 📥 Checkout repository
@@ -47,7 +47,7 @@ jobs:
         env:
           MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
         run: |
-          for i in {1..30}; do
+          for i in {1..60}; do
             if mysql -h mysql -u root -p"$MYSQL_ROOT_PASSWORD" -e "SELECT 1" >/dev/null 2>&1; then
               echo "MySQL ready"
               exit 0
