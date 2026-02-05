@@ -1,4 +1,5 @@
 # etl/load.py
+import os
 import pandas as pd
 from sqlalchemy import (
     create_engine, Table, Column,
@@ -11,8 +12,12 @@ logger = setup_logger()
 # =========================
 # 1️⃣ Connexion MySQL
 # =========================
+DB_USER = os.getenv("DB_USER")
+DB_PASSWORD = os.getenv("DB_PASSWORD")
+DB_NAME = os.getenv("DB_NAME")
+DB_HOST = os.getenv("DB_HOST", "localhost")
 engine = create_engine(
-    "mysql+pymysql://davy:password123@localhost/First_Data",
+    f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}/{DB_NAME}",
     echo=True  # affiche les requêtes SQL (debug)
 )
 

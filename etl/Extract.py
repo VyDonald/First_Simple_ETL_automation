@@ -1,6 +1,7 @@
 # etl/extract.py
 import json
 import logging
+import os
 import requests
 import pandas as pd
 logger = logging.getLogger("scraper")
@@ -11,7 +12,7 @@ logger.info("Logger configured.")
 
 def extract_data():
     try:
-        API_KEY = "21df4d73e5dc83ea09d6f0ed3148d2bc"
+        API_KEY = os.getenv("API_KEY")
         cities = ["Ouagadougou", "New York", "Londres", "Tokyo", "Sydney"]
         print("[EXTRACT] Starting extraction...")
         rows = []

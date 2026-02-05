@@ -25,6 +25,7 @@ def run_pipeline():
 
         create_table()
         load_to_db(df_clean)
+        logger.info("Data successfully loaded into the database")
     except ModuleNotFoundError:
         logger.warning("Database driver not available; saving cleaned files locally instead")
         df_clean.to_csv("data_clean/loaded_data.csv", index=False)

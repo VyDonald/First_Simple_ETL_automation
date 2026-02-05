@@ -16,7 +16,6 @@
 - [🛠️ Configuration](#-configuration)
 - [📊 Données](#-données)
 - [🐛 Dépannage](#-dépannage)
-- [📝 Licence](#-licence)
 
 ---
 
@@ -108,11 +107,11 @@ pip install -r requirements.txt
 Créez un fichier `.env` à la racine du projet (optionnel) :
 
 ```env
-DB_USER=davy
-DB_PASSWORD=password123
-DB_HOST=localhost
-DB_NAME=First_Data
-API_KEY=21df4d73e5dc83ea09d6f0ed3148d2bc
+DB_USER=user
+DB_PASSWORD=password
+DB_HOST= HOST
+DB_NAME=Your_Database
+API_KEY=Your_API_Key
 ```
 
 ### 🔧 Étape 5 : Configurer MySQL (optionnel)
@@ -470,7 +469,7 @@ Les contributions sont bienvenues ! Pour proposer une amélioration :
 
 ## 👤 Auteur
 
-**Davy** - [GitHub](https://github.com/VyDonald) | [Email](mailto:tuwendedavy226@gmail.com))
+**Davy** - [GitHub](https://github.com/VyDonald) | [Email](mailto:tuwendedavy226@gmail.com)
 
 ---
 
