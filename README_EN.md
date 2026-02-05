@@ -469,15 +469,9 @@ Contributions are welcome! To propose an improvement:
 
 ---
 
-## 📝 License
-
-This project is licensed under the **MIT License**. See the `LICENSE` file for details.
-
----
-
 ## 👤 Author
 
-**Davy** - [GitHub](https://github.com) | [Email](mailto:davy@example.com)
+**Davy** - [GitHub](https://github.com/VyDonald) | [Email](mailto:tuwendedavy226@gmail.com)
 
 ---
 
