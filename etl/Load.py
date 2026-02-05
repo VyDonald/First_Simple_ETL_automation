@@ -2,6 +2,7 @@
 import os
 import sys
 import pandas as pd
+from urllib.parse import quote_plus
 from sqlalchemy import (
     create_engine, Table, Column,
     Integer, String, Float, DateTime, MetaData, text
@@ -27,7 +28,10 @@ def get_engine():
     if not DB_NAME:
         raise RuntimeError("❌ DB_NAME is not set in environment")
 
-    url = f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+    # ✅ Encode le password pour gérer @, !, espaces, etc.
+    safe_password = quote_plus(DB_PASSWORD)
+
+    url = f"mysql+pymysql://{DB_USER}:{safe_password}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
     logger.info(f"[LOAD] Connecting to MySQL at {DB_HOST}:{DB_PORT}/{DB_NAME}")
     
     return create_engine(url, echo=False, pool_pre_ping=True)  # echo=False pour moins de logs
