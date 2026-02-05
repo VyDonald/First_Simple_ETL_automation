@@ -17,7 +17,10 @@ jobs:
         ports:
           - 3306:3306
         options: >-
-          --health-cmd="mysqladmin ping -h localhost -u root -p$${MYSQL_ROOT_PASSWORD}" --health-interval=10s --health-timeout=5s --health-retries=10
+          --health-cmd="mysqladmin ping -h localhost"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
 
     steps:
       - name: 📥 Checkout repository
@@ -48,19 +51,19 @@ jobs:
           MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
         run: |
           for i in {1..60}; do
-            if mysql -h mysql -u root -p"$MYSQL_ROOT_PASSWORD" -e "SELECT 1" >/dev/null 2>&1; then
-              echo "MySQL ready"
+            if mysql -h 127.0.0.1 -u root -p"$MYSQL_ROOT_PASSWORD" -e "SELECT 1" >/dev/null 2>&1; then
+              echo "✅ MySQL ready"
               exit 0
             fi
             echo "Waiting for MySQL... ($i)"
             sleep 2
           done
-          echo "MySQL did not become ready" && exit 1
+          echo "❌ MySQL did not become ready" && exit 1
 
       - name: ℹ️ Print DB env (non-secret)
         env:
           DB_USER: root
-          DB_HOST: mysql
+          DB_HOST: 127.0.0.1
           DB_NAME: First_Data
         run: |
           echo "DB_USER=$DB_USER"
@@ -71,7 +74,7 @@ jobs:
         env:
           DB_USER: root
           DB_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
-          DB_HOST: mysql
+          DB_HOST: 127.0.0.1
           DB_NAME: First_Data
         run: |
           python - <<'PY'
@@ -87,7 +90,7 @@ jobs:
           try:
               engine = create_engine(f"mysql+pymysql://{user}:{pwd}@{host}/{name}")
               conn = engine.connect()
-              print('SQLAlchemy: connection OK')
+              print('✅ SQLAlchemy: connection OK')
               conn.close()
           except Exception:
               traceback.print_exc()
@@ -99,7 +102,7 @@ jobs:
           API_KEY: ${{ secrets.API_KEY }}
           DB_USER: root
           DB_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
-          DB_HOST: mysql
+          DB_HOST: 127.0.0.1
           DB_NAME: First_Data
         run: |
           python main.py
