@@ -1,0 +1,68 @@
+name: Weather ETL Pipeline
+
+on:
+  schedule:
+    - cron: "0 * * * *"   # toutes les heures
+  workflow_dispatch:      # bouton "Run"
+
+jobs:
+  etl:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8
+        env:
+          MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+          MYSQL_DATABASE: First_Data
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -u root -p$${MYSQL_ROOT_PASSWORD}" --health-interval=10s --health-timeout=5s --health-retries=5
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🔁 Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: 🛠️ Install system deps (mysql client)
+        run: |
+          sudo apt-get update && sudo apt-get install -y default-mysql-client
+
+      - name: 📦 Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: ⏳ Wait for MySQL service
+        env:
+          MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+        run: |
+          for i in {1..30}; do
+            if mysql -h mysql -u root -p"$MYSQL_ROOT_PASSWORD" -e "SELECT 1" >/dev/null 2>&1; then
+              echo "MySQL ready"
+              exit 0
+            fi
+            echo "Waiting for MySQL... ($i)"
+            sleep 2
+          done
+          echo "MySQL did not become ready" && exit 1
+
+      - name: 🚀 Run ETL pipeline
+        env:
+          API_KEY: ${{ secrets.API_KEY }}
+          DB_USER: root
+          DB_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+          DB_HOST: mysql
+          DB_NAME: First_Data
+        run: |
+          python main.py

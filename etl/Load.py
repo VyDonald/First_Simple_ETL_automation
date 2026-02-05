@@ -13,7 +13,7 @@ logger = setup_logger()
 # 1️⃣ Connexion MySQL
 # =========================
 DB_USER = os.getenv("DB_USER")
-DB_PASSWORD = os.getenv("DB_PASSWORD")
+DB_PASSWORD = os.getenv("MYSQL_ROOT_PASSWORD")
 DB_NAME = os.getenv("DB_NAME")
 DB_HOST = os.getenv("DB_HOST", "localhost")
 engine = create_engine(
